@@ -5,20 +5,17 @@ import com.hj.common.dto.ChangePasswordDto;
 import com.hj.common.dto.GetCodeDto;
 import com.hj.common.dto.RegisterDto;
 import com.hj.common.lang.Result;
+import com.hj.config.zhenziSMS;
 import com.hj.entity.User;
 import com.hj.entity.UserInfo;
 import com.hj.service.UserInfoService;
 import com.hj.service.UserService;
-import com.zhenzi.sms.ZhenziSmsClient;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * <p>
@@ -31,6 +28,10 @@ import java.util.Random;
 @RestController
 @RequestMapping("/user")
 public class UserController {
+
+    @Autowired
+    private zhenziSMS sms;
+
     @Autowired
     UserService userService;
 
@@ -52,6 +53,7 @@ public class UserController {
         userService.updateById(user);
         return Result.success("密码修改成功");
     }
+
     //注册用户接口
     @PostMapping("/register")
     public Result register(@Validated @RequestBody RegisterDto registerDto) {
@@ -70,6 +72,24 @@ public class UserController {
     }
 
     //获取验证码接口
+    @PostMapping("/getcode")
+    public Result getCode(@Validated @RequestBody GetCodeDto getCodeDto){
+        Assert.notNull(getCodeDto.getUserId(), "手机号不存在");
+        try {
+            Map<String, Object> params = sms.sendMessage(getCodeDto.getUserId(), null);
+            if((boolean) params.get("success")) {
+                String[] templateParams = (String[]) params.get("templateParams");
+                return Result.success(templateParams[0]);
+            }else {
+                return Result.fail("短信发送失败");
+            }
+        } catch (Exception e) {
+            Result.fail("短信发送失败");
+        }
+        return Result.fail("短信发送失败");
+    }
+
+    /*//获取验证码接口
     @PostMapping("/getcode")
     public Result getCode(@Validated @RequestBody GetCodeDto getCodeDto ){
         Assert.notNull(getCodeDto.getUserId(), "手机号不存在");
@@ -97,6 +117,6 @@ public class UserController {
             return Result.fail("手机号码格式错误");
         }
         return Result.success(200,"发送成功",code);
-    }
+    }*/
 
 }

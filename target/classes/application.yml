@@ -20,3 +20,9 @@ hj:
     # token有效时长，7天，单位秒
     expire: 604800
     header: token
+sms:
+  apiUrl: https://sms_developer.zhenzikj.com
+  appId: 110151
+  appSecret: 7a312ef9-3aa1-466c-8b90-a661ac56f4a9
+  timeOut: 3
+  codeLength: 4
