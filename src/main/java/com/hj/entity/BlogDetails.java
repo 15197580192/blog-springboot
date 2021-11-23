@@ -26,7 +26,7 @@ public class BlogDetails implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "blog_id", type = IdType.AUTO)
+    @TableId(value = "blog_id")
     private Long blogId;
 
     private String blogTitle;

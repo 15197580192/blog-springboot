@@ -49,11 +49,14 @@ public class UserController {
 
     @PostMapping("/register")
     public Result register(@Validated @RequestBody RegisterDto registerDto) {
-
+        if(userService.getOne(new QueryWrapper<User>().eq("user_id", registerDto.getUserId()))!=null) {
+            return Result.fail("用户已注册");
+        } ;
         User user = new User();
         user.setUserId(registerDto.getUserId());
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(registerDto.getUserId());
+        userInfo.setUserNickname(registerDto.getUserId());
         user.setUserPassword(registerDto.getUserPassword());
         userService.saveOrUpdate(user);
         userInfoService.saveOrUpdate(userInfo);

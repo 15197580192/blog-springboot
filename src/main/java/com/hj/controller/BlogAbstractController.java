@@ -7,7 +7,6 @@ import com.hj.common.dto.BlogEditDto;
 import com.hj.common.lang.Result;
 import com.hj.entity.BlogAbstract;
 import com.hj.entity.BlogDetails;
-import com.hj.entity.User;
 import com.hj.service.BlogAbstractService;
 import com.hj.service.BlogDetailsService;
 import com.hj.util.ShiroUtil;
@@ -42,7 +41,7 @@ public class BlogAbstractController {
         Assert.notNull(blog, "该博客已删除！");
         //return Result.success(blog);
         return Result.success(MapUtil.builder()
-                .put("userId",ablog.getUseUserId())
+                .put("userId",ablog.getUserId())
                 .put("blogdetails",blog)
                 .map()
         );
@@ -55,7 +54,7 @@ public class BlogAbstractController {
     public Result edit(@Validated @RequestBody BlogEditDto blog) {
         //打印前端传来的数据
         System.out.println(blog.toString());
-
+        Long longtemp ;
         BlogDetails temp = null;
         BlogAbstract atemp = null;
         if(blog.getBlogId() != null) {
@@ -63,17 +62,24 @@ public class BlogAbstractController {
             temp = blogDetailsService.getOne(new QueryWrapper<BlogDetails>().eq("blog_id", blog.getBlogId()));
             atemp = blogAbstractService.getOne(new QueryWrapper<BlogAbstract>().eq("blog_id", blog.getBlogId()));
             //只能编辑自己的文章
-            Assert.isTrue(atemp.getUseUserId() == ShiroUtil.getProfile().getUserId(), "没有权限编辑");
+            Assert.isTrue(atemp.getUserId() == ShiroUtil.getProfile().getUserId(), "没有权限编辑");
         }
-        else { // 添加状态
+        else { // 发布状态
             temp = new BlogDetails();
             atemp = new BlogAbstract();
-            temp.setBlogId(1L);
-            atemp.setBlogId(1L);
-            atemp.setUseUserId(ShiroUtil.getProfile().getUserId());
+            //读取数据库中博客的数目
+            Long count = Long.valueOf(blogDetailsService.count(new QueryWrapper<BlogDetails>().isNotNull("blog_id")));
+            System.out.println(count);
+            //数据库博客数加1为新的博客的编号
+            count++;
+            temp.setBlogId(count);
+            atemp.setBlogId(count);
+            //同步博主的id
+            atemp.setUserId(ShiroUtil.getProfile().getUserId());
             atemp.setBlogPublishTime(LocalDateTime.now());
             // temp.setStatus(0);
         }
+        //忽略博客id赋值前端传来的博客信息
         BeanUtil.copyProperties(blog, temp, "blogId");
 
         //打印更新数据库的数据
@@ -82,7 +88,7 @@ public class BlogAbstractController {
 
         blogAbstractService.saveOrUpdate(atemp);
         blogDetailsService.saveOrUpdate(temp);
-        return Result.success(null);
+        return Result.success("操作成功");
     }
 
 }
