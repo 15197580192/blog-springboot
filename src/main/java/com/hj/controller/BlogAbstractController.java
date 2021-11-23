@@ -1,6 +1,7 @@
 package com.hj.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hj.common.dto.BlogEditDto;
 import com.hj.common.lang.Result;
@@ -32,6 +33,20 @@ public class BlogAbstractController {
     BlogDetailsService blogDetailsService;
     @Autowired
     BlogAbstractService blogAbstractService;
+
+    //博客详情
+    @GetMapping("/blog/{id}")
+    public Result detail(@PathVariable(name = "id") Long id) {
+        BlogDetails blog = blogDetailsService.getById(id);
+        BlogAbstract ablog = blogAbstractService.getById(id);
+        Assert.notNull(blog, "该博客已删除！");
+        //return Result.success(blog);
+        return Result.success(MapUtil.builder()
+                .put("userId",ablog.getUseUserId())
+                .put("blogdetails",blog)
+                .map()
+        );
+    }
 
     //登录权限
     @RequiresAuthentication

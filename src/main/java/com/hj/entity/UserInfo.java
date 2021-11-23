@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.io.Serializable;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -25,6 +26,7 @@ public class UserInfo implements Serializable {
 
     private String useUserId;
 
+    @TableId("user_id")
     private String userId;
 
     private String userProfilePhoto;
