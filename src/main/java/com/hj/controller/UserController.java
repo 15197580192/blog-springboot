@@ -1,19 +1,24 @@
 package com.hj.controller;
 
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hj.common.dto.ChangePasswordDto;
+import com.hj.common.dto.GetCodeDto;
 import com.hj.common.dto.RegisterDto;
 import com.hj.common.lang.Result;
 import com.hj.entity.User;
 import com.hj.entity.UserInfo;
 import com.hj.service.UserInfoService;
 import com.hj.service.UserService;
+import com.zhenzi.sms.ZhenziSmsClient;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * <p>
@@ -34,6 +39,7 @@ public class UserController {
 
     @CrossOrigin
     //@RequiresAuthentication
+    //修改密码接口
     @PostMapping("/change")
     public Result change(@Validated @RequestBody ChangePasswordDto changePasswordDto) {
 
@@ -46,12 +52,12 @@ public class UserController {
         userService.updateById(user);
         return Result.success("密码修改成功");
     }
-
+    //注册用户接口
     @PostMapping("/register")
     public Result register(@Validated @RequestBody RegisterDto registerDto) {
         if(userService.getOne(new QueryWrapper<User>().eq("user_id", registerDto.getUserId()))!=null) {
             return Result.fail("用户已注册");
-        } ;
+        }
         User user = new User();
         user.setUserId(registerDto.getUserId());
         UserInfo userInfo = new UserInfo();
@@ -61,6 +67,36 @@ public class UserController {
         userService.saveOrUpdate(user);
         userInfoService.saveOrUpdate(userInfo);
         return Result.success("注册成功");
+    }
+
+    //获取验证码接口
+    @PostMapping("/getcode")
+    public Result getCode(@Validated @RequestBody GetCodeDto getCodeDto ){
+        Assert.notNull(getCodeDto.getUserId(), "手机号不存在");
+        ZhenziSmsClient client = new ZhenziSmsClient("https://sms_developer.zhenzikj.com", "110151", "7a312ef9-3aa1-466c-8b90-a661ac56f4a9");
+        Random rd = new Random();
+        int rd1 = rd.nextInt(10);
+        int rd2 = rd.nextInt(10);
+        int rd3 = rd.nextInt(10);
+        int rd4 = rd.nextInt(10);
+        String code = "" + rd1 + rd2 + rd3 + rd4;
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("number", getCodeDto.getUserId());
+        params.put("templateId", "6993");
+        String[] templateParams = new String[2];
+        templateParams[0] = code;
+        templateParams[1] = "5分钟";
+        params.put("templateParams", templateParams);
+        String result = null;
+        try {
+            result = client.send(params);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        if(result.length()==30) {
+            return Result.fail("手机号码格式错误");
+        }
+        return Result.success(200,"发送成功",code);
     }
 
 }

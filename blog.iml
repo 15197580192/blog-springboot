@@ -138,5 +138,14 @@
     <orderEntry type="library" name="Maven: com.sun.istack:istack-commons-runtime:3.0.7" level="project" />
     <orderEntry type="library" name="Maven: org.jvnet.staxex:stax-ex:1.8" level="project" />
     <orderEntry type="library" name="Maven: com.sun.xml.fastinfoset:FastInfoset:1.2.15" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: com.zhenzikj:zhenzisms:2.0.2">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/src/main/resources/lib/ZhenziSmsSDK.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
