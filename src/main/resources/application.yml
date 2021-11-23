@@ -8,7 +8,7 @@ spring:
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**Mapper.xml
 Server:
-  port:8080
+  port: 8080
 shiro-redis:
   enabled: true
   redis-manager:

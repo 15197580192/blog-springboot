@@ -32,13 +32,6 @@ public class UserController {
     @Autowired
     UserInfoService userInfoService;
 
-//    @RequiresAuthentication
-//    @GetMapping("/index")
-//    public Result index() {
-//        User user = userService.getById(1L);
-//        return Result.success(user);
-//    }
-
     @CrossOrigin
     //@RequiresAuthentication
     @PostMapping("/change")
@@ -54,7 +47,7 @@ public class UserController {
         return Result.success("密码修改成功");
     }
 
-    @PostMapping("/regiter")
+    @PostMapping("/register")
     public Result register(@Validated @RequestBody RegisterDto registerDto) {
 
         User user = new User();
@@ -67,9 +60,4 @@ public class UserController {
         return Result.success("注册成功");
     }
 
-
-//    @PostMapping("/save")
-//    public Result save(@Validated @RequestBody User user) {
-//        return Result.success(user);
-//    }
 }
