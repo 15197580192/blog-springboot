@@ -2,6 +2,7 @@ package com.hj.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hj.common.dto.ChangePasswordDto;
+import com.hj.common.dto.FindCodeDto;
 import com.hj.common.dto.GetCodeDto;
 import com.hj.common.dto.RegisterDto;
 import com.hj.common.lang.Result;
@@ -15,6 +16,7 @@ import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -60,6 +62,12 @@ public class UserController {
         if(userService.getOne(new QueryWrapper<User>().eq("user_id", registerDto.getUserId()))!=null) {
             return Result.fail("用户已注册");
         }
+        if((new Date().getTime()-GetCodeDto.date.getTime())>180000) {
+            return Result.fail("验证期限已过，请重新获取验证码");
+        }
+        if(!registerDto.getCode().equals(GetCodeDto.code)) {
+            return Result.fail("验证码错误");
+        }
         User user = new User();
         user.setUserId(registerDto.getUserId());
         UserInfo userInfo = new UserInfo();
@@ -71,6 +79,26 @@ public class UserController {
         return Result.success("注册成功");
     }
 
+    //找回密码接口
+    @PostMapping("/findcode")
+    public Result getCode(@Validated @RequestBody FindCodeDto findCodeDto){
+        if(userService.getOne(new QueryWrapper<User>().eq("user_id", findCodeDto.getUserId()))==null) {
+            return Result.fail("用户不存在");
+        }
+        //防止用户第一次输入自己的手机号，第二次输入他人的手机号，通过自己收到的验证码来获得他人的账户密码
+        if(!findCodeDto.getUserId().equals(FindCodeDto.checkId)) {
+            return Result.fail("请输入收到验证码的用户手机号");
+        }
+        if((new Date().getTime()-GetCodeDto.date.getTime())>180000) {
+            return Result.fail("验证期限已过，请重新获取验证码");
+        }
+        if(!findCodeDto.getCode().equals(GetCodeDto.code)) {
+            return Result.fail("验证码错误");
+        }
+        User user = userService.getById(findCodeDto.getUserId());
+        return Result.success(user.getUserPassword());
+    }
+
     //获取验证码接口
     @PostMapping("/getcode")
     public Result getCode(@Validated @RequestBody GetCodeDto getCodeDto){
@@ -79,6 +107,9 @@ public class UserController {
             Map<String, Object> params = sms.sendMessage(getCodeDto.getUserId(), null);
             if((boolean) params.get("success")) {
                 String[] templateParams = (String[]) params.get("templateParams");
+                GetCodeDto.code=templateParams[0];
+                GetCodeDto.date=new Date();
+                FindCodeDto.checkId=getCodeDto.getUserId();
                 return Result.success(templateParams[0]);
             }else {
                 return Result.fail("短信发送失败");
@@ -88,35 +119,5 @@ public class UserController {
         }
         return Result.fail("短信发送失败");
     }
-
-    /*//获取验证码接口
-    @PostMapping("/getcode")
-    public Result getCode(@Validated @RequestBody GetCodeDto getCodeDto ){
-        Assert.notNull(getCodeDto.getUserId(), "手机号不存在");
-        ZhenziSmsClient client = new ZhenziSmsClient("https://sms_developer.zhenzikj.com", "110151", "7a312ef9-3aa1-466c-8b90-a661ac56f4a9");
-        Random rd = new Random();
-        int rd1 = rd.nextInt(10);
-        int rd2 = rd.nextInt(10);
-        int rd3 = rd.nextInt(10);
-        int rd4 = rd.nextInt(10);
-        String code = "" + rd1 + rd2 + rd3 + rd4;
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("number", getCodeDto.getUserId());
-        params.put("templateId", "6993");
-        String[] templateParams = new String[2];
-        templateParams[0] = code;
-        templateParams[1] = "5分钟";
-        params.put("templateParams", templateParams);
-        String result = null;
-        try {
-            result = client.send(params);
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-        if(result.length()==30) {
-            return Result.fail("手机号码格式错误");
-        }
-        return Result.success(200,"发送成功",code);
-    }*/
 
 }

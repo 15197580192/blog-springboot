@@ -12,4 +12,6 @@ public class RegisterDto {
     @NotBlank(message = "密码不能为空")
     private String userPassword;
 
+    @NotBlank(message = "验证码不能为空")
+    private String code;
 }

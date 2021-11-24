@@ -103,9 +103,9 @@ public class zhenziSMS {
         Verification verification = JSONObject.parseObject(result, Verification.class);
         if (verification.getCode() == 0) {
             //取到了数据，开始验证码是否正确
-            String veificationCode = verification.getData().getMessage();
-            int index = veificationCode.indexOf("验证码:");
-            String code = veificationCode.substring(index + 4, index + 4 + codeLength);
+            String verificationCode = verification.getData().getMessage();
+            int index = verificationCode.indexOf("验证码:");
+            String code = verificationCode.substring(index + 4, index + 4 + codeLength);
             //验证验证码
             if (!code.equals(cacheCode)) {
                 return false;
