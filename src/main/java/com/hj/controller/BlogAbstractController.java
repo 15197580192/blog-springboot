@@ -3,10 +3,14 @@ package com.hj.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hj.common.dto.BlogEditDto;
 import com.hj.common.lang.Result;
+import com.hj.entity.AllBlog;
 import com.hj.entity.BlogAbstract;
 import com.hj.entity.BlogDetails;
+import com.hj.service.AllBlogService;
 import com.hj.service.BlogAbstractService;
 import com.hj.service.BlogDetailsService;
 import com.hj.util.ShiroUtil;
@@ -32,6 +36,17 @@ public class BlogAbstractController {
     BlogDetailsService blogDetailsService;
     @Autowired
     BlogAbstractService blogAbstractService;
+    @Autowired
+    AllBlogService allBlogService;
+
+    //博客列表
+    @GetMapping("/blogs")
+    public Result blogs(Integer currentPage) {
+        if(currentPage == null || currentPage < 1) currentPage = 1;
+        Page page = new Page(currentPage, 5);
+        IPage pageData = allBlogService.page(page, new QueryWrapper<AllBlog>().orderByDesc("blog_id"));
+        return Result.success(pageData);
+    }
 
     //博客详情
     @GetMapping("/blog/{id}")
@@ -62,7 +77,9 @@ public class BlogAbstractController {
             temp = blogDetailsService.getOne(new QueryWrapper<BlogDetails>().eq("blog_id", blog.getBlogId()));
             atemp = blogAbstractService.getOne(new QueryWrapper<BlogAbstract>().eq("blog_id", blog.getBlogId()));
             //只能编辑自己的文章
-            Assert.isTrue(atemp.getUserId() == ShiroUtil.getProfile().getUserId(), "没有权限编辑");
+            System.out.println(atemp.getUserId());
+            System.out.println(ShiroUtil.getProfile().getUserId());
+            Assert.isTrue(atemp.getUserId() != ShiroUtil.getProfile().getUserId(), "没有权限编辑");
         }
         else { // 发布状态
             temp = new BlogDetails();
