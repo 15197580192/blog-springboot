@@ -96,7 +96,9 @@ public class UserController {
             return Result.fail("验证码错误");
         }
         User user = userService.getById(findCodeDto.getUserId());
-        return Result.success(user.getUserPassword());
+        user.setUserPassword(findCodeDto.getNewPassword());
+        userService.updateById(user);
+        return Result.success("密码已重置");
     }
 
     //获取验证码接口
