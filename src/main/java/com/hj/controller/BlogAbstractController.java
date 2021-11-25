@@ -48,6 +48,15 @@ public class BlogAbstractController {
         return Result.success(pageData);
     }
 
+    //我的博客列表
+    @GetMapping("/myblogs")
+    public Result myblogs(String userId,Integer currentPage) {
+        if(currentPage == null || currentPage < 1) currentPage = 1;
+        Page page = new Page(currentPage, 5);
+        IPage pageData = allBlogService.page(page, new QueryWrapper<AllBlog>().orderByDesc("blog_id").eq("user_id",Long.parseLong(userId)));
+        return Result.success(pageData);
+    }
+
     //博客详情
     @GetMapping("/blog/{id}")
     public Result detail(@PathVariable(name = "id") Long id) {

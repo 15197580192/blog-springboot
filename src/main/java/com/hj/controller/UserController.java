@@ -1,10 +1,8 @@
 package com.hj.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.hj.common.dto.ChangePasswordDto;
-import com.hj.common.dto.FindCodeDto;
-import com.hj.common.dto.GetCodeDto;
-import com.hj.common.dto.RegisterDto;
+import com.hj.common.dto.*;
 import com.hj.common.lang.Result;
 import com.hj.config.zhenziSMS;
 import com.hj.entity.User;
@@ -54,6 +52,22 @@ public class UserController {
         user.setUserPassword(changePasswordDto.getUserNewPassword());
         userService.updateById(user);
         return Result.success("密码修改成功");
+    }
+
+    //修改个人资料接口
+    @PostMapping("/changeinfo")
+    public Result changeInfo(@Validated @RequestBody UserInfoDto userInfoDto) {
+        UserInfo userInfo = userInfoService.getOne(new QueryWrapper<UserInfo>().eq("user_id",userInfoDto.getUserId()));
+        BeanUtil.copyProperties(userInfoDto,userInfo,"userId");
+        userInfoService.saveOrUpdate(userInfo);
+        return Result.success(userInfo);
+    }
+
+    //获取个人信息接口
+    @PostMapping("/getinfo")
+    public Result getInfo(@Validated @RequestBody UserInfoDto userInfoDto) {
+        UserInfo userInfo = userInfoService.getOne(new QueryWrapper<UserInfo>().eq("user_id",userInfoDto.getUserId()));
+        return Result.success(userInfo);
     }
 
     //注册用户接口
