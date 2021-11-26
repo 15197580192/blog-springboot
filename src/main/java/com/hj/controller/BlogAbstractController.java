@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hj.common.dto.BlogEditDto;
 import com.hj.common.lang.Result;
 import com.hj.entity.AllBlog;
+import com.hj.entity.AllUser;
 import com.hj.entity.BlogAbstract;
 import com.hj.entity.BlogDetails;
 import com.hj.service.AllBlogService;
@@ -21,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * <p>
@@ -39,7 +41,7 @@ public class BlogAbstractController {
     @Autowired
     AllBlogService allBlogService;
 
-    //博客列表
+    //新闻博客列表
     @GetMapping("/blogs")
     public Result blogs(Integer currentPage) {
         if(currentPage == null || currentPage < 1) currentPage = 1;
@@ -57,7 +59,7 @@ public class BlogAbstractController {
         return Result.success(pageData);
     }
 
-    //博客详情
+    //查看博客详情
     @GetMapping("/blog/{id}")
     public Result detail(@PathVariable(name = "id") Long id) {
         BlogDetails blog = blogDetailsService.getById(id);
@@ -69,6 +71,16 @@ public class BlogAbstractController {
                 .put("blogdetails",blog)
                 .map()
         );
+    }
+
+    //删除博客
+    @PostMapping("/deleteblog/{id}")
+    public Result deleteblog(@RequestBody @PathVariable(name = "id")Long id) {
+        blogDetailsService.removeById(id);
+        blogAbstractService.removeById(id);
+
+        //return Result.success(blog);
+        return Result.success("博客删除成功");
     }
 
     //登录权限
@@ -94,7 +106,9 @@ public class BlogAbstractController {
             temp = new BlogDetails();
             atemp = new BlogAbstract();
             //读取数据库中博客的数目
-            Long count = Long.valueOf(blogDetailsService.count(new QueryWrapper<BlogDetails>().isNotNull("blog_id")));
+            AllBlog allBlog = allBlogService.getOne(new QueryWrapper<AllBlog>().orderByDesc("blog_id").last("limit 1"));
+
+            Long count = allBlog.getBlogId();//Long.valueOf(blogDetailsService.count(new QueryWrapper<BlogDetails>().isNotNull("blog_id")));
             System.out.println(count);
             //数据库博客数加1为新的博客的编号
             count++;

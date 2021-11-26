@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hj.common.dto.*;
 import com.hj.common.lang.Result;
 import com.hj.config.zhenziSMS;
+import com.hj.entity.AllUser;
 import com.hj.entity.User;
 import com.hj.entity.UserInfo;
+import com.hj.service.AllUserService;
 import com.hj.service.UserInfoService;
 import com.hj.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,9 @@ public class UserController {
     @Autowired
     UserInfoService userInfoService;
 
+    @Autowired
+    AllUserService allUserService;
+
     @CrossOrigin
     //@RequiresAuthentication
     //修改密码接口
@@ -59,15 +64,20 @@ public class UserController {
     public Result changeInfo(@Validated @RequestBody UserInfoDto userInfoDto) {
         UserInfo userInfo = userInfoService.getOne(new QueryWrapper<UserInfo>().eq("user_id",userInfoDto.getUserId()));
         BeanUtil.copyProperties(userInfoDto,userInfo,"userId");
+//        User user = userService.getOne(new QueryWrapper<User>().eq("user_id",userInfoDto.getUserId()));
+//        BeanUtil.copyProperties(userInfoDto,user,"userId");
         userInfoService.saveOrUpdate(userInfo);
+//        userService.saveOrUpdate(user);
         return Result.success(userInfo);
     }
+
+
 
     //获取个人信息接口
     @PostMapping("/getinfo")
     public Result getInfo(@Validated @RequestBody UserInfoDto userInfoDto) {
-        UserInfo userInfo = userInfoService.getOne(new QueryWrapper<UserInfo>().eq("user_id",userInfoDto.getUserId()));
-        return Result.success(userInfo);
+        AllUser allUser = allUserService.getOne(new QueryWrapper<AllUser>().eq("user_id",userInfoDto.getUserId()));
+        return Result.success(allUser);
     }
 
     //注册用户接口

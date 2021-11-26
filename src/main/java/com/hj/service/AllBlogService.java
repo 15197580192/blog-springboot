@@ -3,6 +3,8 @@ package com.hj.service;
 import com.hj.entity.AllBlog;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.Map;
+
 /**
  * <p>
  * VIEW 服务类
@@ -13,4 +15,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface AllBlogService extends IService<AllBlog> {
 
+    /**
+     * 获取MaxBlogId Map
+     * @return
+     */
+    Map<String, AllBlog> getMaxBlogIdMap();
 }
