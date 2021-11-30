@@ -183,4 +183,13 @@ public class BlogAbstractController {
         return Result.success("操作成功");
     }
 
+    //搜索博客
+    @GetMapping("/blog/search")
+    public Result search(String searchBlog,Integer currentPage) {
+        if(currentPage == null || currentPage < 1) currentPage = 1;
+        Page page = new Page(currentPage, 5);
+        IPage pageData = allBlogService.page(page, new QueryWrapper<AllBlog>().orderByDesc("blog_id").like(searchBlog!=null,"blog_title",searchBlog));
+        return Result.success(pageData);
+    }
+
 }
