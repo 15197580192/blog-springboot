@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hj.common.dto.BlogEditDto;
 import com.hj.common.dto.CommentDto;
 import com.hj.common.dto.DelCommentDto;
+import com.hj.common.dto.GetMyCommentDto;
 import com.hj.common.lang.Result;
 import com.hj.entity.*;
 import com.hj.service.*;
@@ -19,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,6 +41,9 @@ public class BlogAbstractController {
     AllBlogService allBlogService;
     @Autowired
     CommentService commentService;
+    @Autowired
+    AllCommentService allCommentService;
+
 
     //新闻博客列表
     @GetMapping("/blogs")
@@ -87,6 +92,15 @@ public class BlogAbstractController {
     public Result getcomment(@RequestBody @PathVariable(name = "id") Long id) {
         List<Comment> comment = commentService.list(new QueryWrapper<Comment>().eq("blog_id",id).eq("parent_comment_id",0).orderByAsc("parent_comment_id","comment_date"));
         return Result.success(comment);
+    }
+
+    //查看我的评论
+    @GetMapping("/getComments")
+    public Result getMyComment(String userId,Integer currentPage) {
+        if(currentPage == null || currentPage < 1) currentPage = 1;
+        Page page = new Page(currentPage, 5);
+        IPage pageData = allCommentService.page(page, new QueryWrapper<AllComment>().orderByDesc("comment_date").eq("user_id",Long.parseLong(userId)));
+        return Result.success(pageData);
     }
 
     //查看子评论
