@@ -6,14 +6,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hj.common.dto.BlogEditDto;
+import com.hj.common.dto.CommentDto;
+import com.hj.common.dto.DelCommentDto;
 import com.hj.common.lang.Result;
-import com.hj.entity.AllBlog;
-import com.hj.entity.AllUser;
-import com.hj.entity.BlogAbstract;
-import com.hj.entity.BlogDetails;
-import com.hj.service.AllBlogService;
-import com.hj.service.BlogAbstractService;
-import com.hj.service.BlogDetailsService;
+import com.hj.entity.*;
+import com.hj.service.*;
 import com.hj.util.ShiroUtil;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 
 /**
  * <p>
@@ -40,6 +37,8 @@ public class BlogAbstractController {
     BlogAbstractService blogAbstractService;
     @Autowired
     AllBlogService allBlogService;
+    @Autowired
+    CommentService commentService;
 
     //新闻博客列表
     @GetMapping("/blogs")
@@ -81,6 +80,59 @@ public class BlogAbstractController {
 
         //return Result.success(blog);
         return Result.success("博客删除成功");
+    }
+
+    //查看评论
+    @PostMapping("/blog/{id}/getcomment")
+    public Result getcomment(@RequestBody @PathVariable(name = "id") Long id) {
+        List<Comment> comment = commentService.list(new QueryWrapper<Comment>().eq("blog_id",id).eq("parent_comment_id",0).orderByAsc("parent_comment_id","comment_date"));
+        return Result.success(comment);
+    }
+
+    //查看子评论
+    @PostMapping("/blog/{id}/getchildcomment")
+    public Result getchildcomment(@PathVariable(name = "id") Long id, @RequestBody Comment commentDto) {
+        List<Comment> comments = commentService.list(new QueryWrapper<Comment>().eq("blog_id",id).eq("parent_comment_id",commentDto.getCommentId()).orderByAsc("comment_date"));
+        System.out.println(comments);
+        return Result.success(comments);
+    }
+
+    //增加评论
+    @PostMapping("/blog/{id}/comment")
+    public Result comment(@PathVariable(name = "id") Long id, @Validated @RequestBody CommentDto commentDto) {
+
+        // 读取数据库中最大评论id
+        Comment comment = commentService.getOne(new QueryWrapper<Comment>().orderByDesc("comment_id").last("limit 1"));
+        // 新增评论的id为最大评论id加1
+        Long count = comment.getCommentId();
+        count++;
+        Comment comment1 = new Comment();
+        BeanUtil.copyProperties(commentDto, comment1, "commentId","blogId");
+        comment1.setCommentId(count);
+        comment1.setCommentDate(LocalDateTime.now());
+        comment1.setBlogId(id);
+        //没有父评论，设置自己为父评论
+        if(commentDto.getParentCommentId()==null) {
+            comment1.setParentCommentId(0L);
+        }
+        commentService.saveOrUpdate(comment1);
+        return Result.success(comment1);
+    }
+
+    //删除评论
+    @PostMapping("/blog/{id}/delcomment")
+    public Result delcomment(@PathVariable(name = "id") Long id, @Validated @RequestBody DelCommentDto commentDto) {
+        //评论发表人
+        String userId = commentService.getOne(new QueryWrapper<Comment>().eq("comment_id",commentDto.getCommentId())).getUserId();
+        //博客作者
+        String bloguserId = allBlogService.getOne(new QueryWrapper<AllBlog>().eq("blog_id",id)).getUserId();
+
+        //评论发表人或博客作者有权限删除评论
+        if((!userId.equals(commentDto.getUserId()))&&(!bloguserId.equals(commentDto.getUserId()))) {
+            return Result.fail("没有权限删除评论！");
+        }
+        commentService.removeById(commentDto.getCommentId());
+        return Result.success("删除评论成功");
     }
 
     //登录权限
