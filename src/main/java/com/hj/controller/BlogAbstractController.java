@@ -90,7 +90,7 @@ public class BlogAbstractController {
     //查看评论
     @PostMapping("/blog/{id}/getcomment")
     public Result getcomment(@RequestBody @PathVariable(name = "id") Long id) {
-        List<Comment> comment = commentService.list(new QueryWrapper<Comment>().eq("blog_id",id).eq("parent_comment_id",0).orderByAsc("parent_comment_id","comment_date"));
+        List<AllComment> comment = allCommentService.list(new QueryWrapper<AllComment>().eq("blog_id",id).eq("parent_comment_id",0).orderByAsc("comment_date"));
         return Result.success(comment);
     }
 

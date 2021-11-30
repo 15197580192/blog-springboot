@@ -38,7 +38,10 @@ public class AllBlog implements Serializable {
 
     private Long blogCollectCount;
 
-    @TableField("blog_backup_1")
+    @TableField("user_nick_name")
+    private String userNickname;
+
+    @TableField("blog_backip_1")
     private String blogBackup1;
     @TableField("blog_backup_2")
     private String blogBackup2;

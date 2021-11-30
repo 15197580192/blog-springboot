@@ -29,6 +29,9 @@ public class AllComment implements Serializable {
 
     private String userId;
 
+    @TableField("user_nick_name")
+    private String userNickname;
+
     private Long commentLikeCount;
 
     private Long commentReportCount;
