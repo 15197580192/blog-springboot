@@ -40,8 +40,8 @@ public class BlogAbstract implements Serializable {
 
     private Long blogCollectCount;
 
-    @TableField("blog_backip_1")
-    private String blogBackip1;
+    @TableField("blog_backup_1")
+    private String blogBackup1;
     @TableField("blog_backup_2")
     private String blogBackup2;
     @TableField("blog_backup_3")
