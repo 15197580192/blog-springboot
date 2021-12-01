@@ -60,7 +60,7 @@ public class UserController {
     }
 
     //修改个人资料接口
-    @PostMapping("/changeinfo")
+    @PostMapping("/info/change")
     public Result changeInfo(@Validated @RequestBody UserInfoDto userInfoDto) {
         UserInfo userInfo = userInfoService.getOne(new QueryWrapper<UserInfo>().eq("user_id",userInfoDto.getUserId()));
         BeanUtil.copyProperties(userInfoDto,userInfo,"userId");
@@ -74,7 +74,7 @@ public class UserController {
 
 
     //获取个人信息接口
-    @PostMapping("/getinfo")
+    @PostMapping("/info")
     public Result getInfo(@Validated @RequestBody UserInfoDto userInfoDto) {
         AllUser allUser = allUserService.getOne(new QueryWrapper<AllUser>().eq("user_id",userInfoDto.getUserId()));
         return Result.success(allUser);
@@ -104,7 +104,7 @@ public class UserController {
     }
 
     //找回密码接口
-    @PostMapping("/findcode")
+    @PostMapping("/find")
     public Result getCode(@Validated @RequestBody FindCodeDto findCodeDto){
         if(userService.getOne(new QueryWrapper<User>().eq("user_id", findCodeDto.getUserId()))==null) {
             return Result.fail("用户不存在");
@@ -126,7 +126,7 @@ public class UserController {
     }
 
     //获取验证码接口
-    @PostMapping("/getcode")
+    @PostMapping("/code")
     public Result getCode(@Validated @RequestBody GetCodeDto getCodeDto){
         Assert.notNull(getCodeDto.getUserId(), "手机号不存在");
         try {

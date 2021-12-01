@@ -78,8 +78,8 @@ public class BlogAbstractController {
     }
 
     //删除博客
-    @PostMapping("/deleteblog/{id}")
-    public Result deleteblog(@RequestBody @PathVariable(name = "id")Long id) {
+    @PostMapping("/blog/delete/{id}")
+    public Result deleteBlog(@RequestBody @PathVariable(name = "id")Long id) {
         blogDetailsService.removeById(id);
         blogAbstractService.removeById(id);
 
@@ -88,14 +88,14 @@ public class BlogAbstractController {
     }
 
     //查看评论
-    @PostMapping("/blog/{id}/getcomment")
-    public Result getcomment(@RequestBody @PathVariable(name = "id") Long id) {
+    @PostMapping("/blog/{id}/comments")
+    public Result getComment(@RequestBody @PathVariable(name = "id") Long id) {
         List<AllComment> comment = allCommentService.list(new QueryWrapper<AllComment>().eq("blog_id",id).eq("parent_comment_id",0).orderByAsc("comment_date"));
         return Result.success(comment);
     }
 
     //查看我的评论
-    @GetMapping("/getComments")
+    @GetMapping("/my/comments")
     public Result getMyComment(String userId,Integer currentPage) {
         if(currentPage == null || currentPage < 1) currentPage = 1;
         Page page = new Page(currentPage, 5);
@@ -104,8 +104,8 @@ public class BlogAbstractController {
     }
 
     //查看子评论
-    @PostMapping("/blog/{id}/getchildcomment")
-    public Result getchildcomment(@PathVariable(name = "id") Long id, @RequestBody Comment commentDto) {
+    @PostMapping("/blog/{id}/comments/child")
+    public Result getChildComment(@PathVariable(name = "id") Long id, @RequestBody Comment commentDto) {
         List<Comment> comments = commentService.list(new QueryWrapper<Comment>().eq("blog_id",id).eq("parent_comment_id",commentDto.getCommentId()).orderByAsc("comment_date"));
         System.out.println(comments);
         return Result.success(comments);
