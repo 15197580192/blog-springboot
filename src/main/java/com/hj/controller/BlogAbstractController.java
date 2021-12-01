@@ -55,8 +55,8 @@ public class BlogAbstractController {
     }
 
     //我的博客列表
-    @GetMapping("/myblogs")
-    public Result myblogs(String userId,Integer currentPage) {
+    @GetMapping("/my/blogs")
+    public Result myBlogs(String userId,Integer currentPage) {
         if(currentPage == null || currentPage < 1) currentPage = 1;
         Page page = new Page(currentPage, 5);
         IPage pageData = allBlogService.page(page, new QueryWrapper<AllBlog>().orderByDesc("blog_id").eq("user_id",Long.parseLong(userId)));
@@ -67,12 +67,12 @@ public class BlogAbstractController {
     @GetMapping("/blog/{id}")
     public Result detail(@PathVariable(name = "id") Long id) {
         BlogDetails blog = blogDetailsService.getById(id);
-        BlogAbstract ablog = blogAbstractService.getById(id);
+        BlogAbstract aBlog = blogAbstractService.getById(id);
         Assert.notNull(blog, "该博客已删除！");
         //return Result.success(blog);
         return Result.success(MapUtil.builder()
-                .put("userId",ablog.getUserId())
-                .put("blogdetails",blog)
+                .put("userId",aBlog.getUserId())
+                .put("blogDetails",blog)
                 .map()
         );
     }
@@ -134,15 +134,15 @@ public class BlogAbstractController {
     }
 
     //删除评论
-    @PostMapping("/blog/{id}/delcomment")
-    public Result delcomment(@PathVariable(name = "id") Long id, @Validated @RequestBody DelCommentDto commentDto) {
+    @PostMapping("/blog/{id}/comment/delete")
+    public Result delComment(@PathVariable(name = "id") Long id, @Validated @RequestBody DelCommentDto commentDto) {
         //评论发表人
         String userId = commentService.getOne(new QueryWrapper<Comment>().eq("comment_id",commentDto.getCommentId())).getUserId();
         //博客作者
-        String bloguserId = allBlogService.getOne(new QueryWrapper<AllBlog>().eq("blog_id",id)).getUserId();
+        String blogUserId = allBlogService.getOne(new QueryWrapper<AllBlog>().eq("blog_id",id)).getUserId();
 
         //评论发表人或博客作者有权限删除评论
-        if((!userId.equals(commentDto.getUserId()))&&(!bloguserId.equals(commentDto.getUserId()))) {
+        if((!userId.equals(commentDto.getUserId()))&&(!blogUserId.equals(commentDto.getUserId()))) {
             return Result.fail("没有权限删除评论！");
         }
         commentService.removeById(commentDto.getCommentId());
@@ -156,21 +156,20 @@ public class BlogAbstractController {
     public Result edit(@Validated @RequestBody BlogEditDto blog) {
         //打印前端传来的数据
         System.out.println(blog.toString());
-        Long longtemp ;
         BlogDetails temp = null;
-        BlogAbstract atemp = null;
+        BlogAbstract aTemp = null;
         if(blog.getBlogId() != null) {
             // 编辑状态
             temp = blogDetailsService.getOne(new QueryWrapper<BlogDetails>().eq("blog_id", blog.getBlogId()));
-            atemp = blogAbstractService.getOne(new QueryWrapper<BlogAbstract>().eq("blog_id", blog.getBlogId()));
+            aTemp = blogAbstractService.getOne(new QueryWrapper<BlogAbstract>().eq("blog_id", blog.getBlogId()));
             //只能编辑自己的文章
-            System.out.println(atemp.getUserId());
+            System.out.println(aTemp.getUserId());
             System.out.println(ShiroUtil.getProfile().getUserId());
-            Assert.isTrue(atemp.getUserId() != ShiroUtil.getProfile().getUserId(), "没有权限编辑");
+            Assert.isTrue(aTemp.getUserId() != ShiroUtil.getProfile().getUserId(), "没有权限编辑");
         }
         else { // 发布状态
             temp = new BlogDetails();
-            atemp = new BlogAbstract();
+            aTemp = new BlogAbstract();
             //读取数据库中博客的数目
             AllBlog allBlog = allBlogService.getOne(new QueryWrapper<AllBlog>().orderByDesc("blog_id").last("limit 1"));
 
@@ -179,10 +178,10 @@ public class BlogAbstractController {
             //数据库博客数加1为新的博客的编号
             count++;
             temp.setBlogId(count);
-            atemp.setBlogId(count);
+            aTemp.setBlogId(count);
             //同步博主的id
-            atemp.setUserId(ShiroUtil.getProfile().getUserId());
-            atemp.setBlogPublishTime(LocalDateTime.now());
+            aTemp.setUserId(ShiroUtil.getProfile().getUserId());
+            aTemp.setBlogPublishTime(LocalDateTime.now());
             // temp.setStatus(0);
         }
         //忽略博客id赋值前端传来的博客信息
@@ -190,9 +189,9 @@ public class BlogAbstractController {
 
         //打印更新数据库的数据
         System.out.println(temp.toString());
-        System.out.println(atemp.toString());
+        System.out.println(aTemp.toString());
 
-        blogAbstractService.saveOrUpdate(atemp);
+        blogAbstractService.saveOrUpdate(aTemp);
         blogDetailsService.saveOrUpdate(temp);
         return Result.success("操作成功");
     }

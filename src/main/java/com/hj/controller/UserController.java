@@ -64,10 +64,7 @@ public class UserController {
     public Result changeInfo(@Validated @RequestBody UserInfoDto userInfoDto) {
         UserInfo userInfo = userInfoService.getOne(new QueryWrapper<UserInfo>().eq("user_id",userInfoDto.getUserId()));
         BeanUtil.copyProperties(userInfoDto,userInfo,"userId");
-//        User user = userService.getOne(new QueryWrapper<User>().eq("user_id",userInfoDto.getUserId()));
-//        BeanUtil.copyProperties(userInfoDto,user,"userId");
         userInfoService.saveOrUpdate(userInfo);
-//        userService.saveOrUpdate(user);
         return Result.success(userInfo);
     }
 
