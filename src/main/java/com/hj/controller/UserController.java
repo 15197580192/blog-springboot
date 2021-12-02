@@ -16,6 +16,7 @@ import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -91,6 +92,7 @@ public class UserController {
         }
         User user = new User();
         user.setUserId(registerDto.getUserId());
+        user.setRegisterTime(LocalDateTime.now());
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(registerDto.getUserId());
         userInfo.setUserNickname(registerDto.getUserId());
